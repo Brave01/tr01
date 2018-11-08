@@ -1,0 +1,235 @@
+张淑敏
+zhangsm@tedu.cn
+MySQL     6天
+
+win32     9天
+
+MFC       16天
+
+1 SQL语言
+  DDL: create   alter   drop
+  DML: insert   update  delete
+  TCL: commit   rollback  savepoint
+  DQL: select
+  DCL: create user    grant    revoke
+
+2. 连接MySQL数据库
+ mysql -u root -p
+ mysql -h localhost -u root -ptarena mysql
+ mysql -h ip地址 -u root -p
+3. 数据库管理
+ 3.1 创建数据库
+  create database 数据库名;
+  create database choose;
+ 3.2 查看数据库
+  show databases;
+  show create database 数据库名;
+  例如:
+  show create database choose;
+
+ 3.3 选择数据库
+  use 数据库名;
+  use choose;
+ 3.4 删除数据库
+  drop databse 数据库名;
+4.表管理
+ 4.1 创建表
+  create table my_table(
+     id int,
+     name char(10),
+     phone char(11)
+  );
+ 4.2 查看表
+  show tables; # 查看当前数据库中的所有表 
+  desc 表名;    # 查看表结构
+  show create table 表名;  # 查看表的详细信息
+ 4.3 删除数据库表
+  drop table 表名;
+
+5.约束
+ 5.1 约束的类型
+  1) 主键约束 primary key
+     一个表中只能有一个主键约束
+     不允许重复 不允许为NULL
+  2) 唯一约束 unique
+     值不允许重复
+  3) 非空约束 not null
+     不允许为null
+  4) 检查约束 (MySQL目前不支持,可以通过触发器等实现)
+  5) 默认值约束 default
+  6) 外键约束 foreign key
+ 5.2 主键约束
+  1) 单一字段做主键
+   create table test_constraint(
+      id int primary key,
+      name char(10)
+   );
+  2) 复合主键
+   drop table test_constraint;
+   # 一个表中只能有一个主键  错误
+   create table test_constraint(
+      id int primary key,
+      userid char(20) primary key,
+      name char(10)
+   );
+   # 复合主键
+   create table test_constraint(
+      id int,
+      userid char(20),
+      name char(10),
+      primary key(id,userid)
+   );
+  5.3 非空约束
+   drop table test_constraint;
+   create table test_constraint(
+     id int primary key,
+     name char(10) not null
+   );
+  5.4 默认约束
+   drop table test_constraint;
+   create table test_constraint(
+     id int primary key,
+     name char(10) not null,
+     age int default 20
+   );
+  5.5 唯一约束
+   drop table test_constraint;
+   create table test_constraint(
+     id int primary key,
+     userid char(18) unique not null
+   );
+   drop table test_constraint;
+   # 一个表中可以有多个唯一约束
+   create table test_constraint(
+     id int unique,
+     userid char(18) unique
+   );
+  5.6 外键约束
+   主表(父表): 提供数据的表  主键
+   从表(子表): 外键所在的表
+     外键字段的要么来自于主表中的对应字段,要么为null.
+   # 创建主表--班级表
+   create table classes(
+     class_no int primary key,
+     class_name char(20)
+   );
+   # 创建从表 -- 学生表
+   create table student(
+     stu_no int primary key,
+     stu_name char(10) not null,
+     class_no int,
+     foreign key(class_no) references classes(class_no)
+   );
+   1) 创建表时,先创建主表,再创建从表
+   2) 被引用的字段必须是主表的主键字段
+  5.7 为约束命名
+   语法:
+    constraint 约束名 约束规则
+   
+   create table test(
+     t_no int primary key,
+     t_name char(10),
+     constraint test_name_uk unique(t_name)
+   );
+   # 外键
+   constraint 约束名 foreign key(字段名) references
+    主表名(主键字段名)
+  5.8 自增型字段
+   drop table test;
+   create table test(
+     t_no int auto_increment primary key,
+     name char(10) not null
+   );
+6 创建"选课系统"数据库
+ 6.1 创建数据库
+   create database choose character set=utf8;
+ 6.2 创建班级表
+  表名:classes
+  字段: class_no 整型 自增长 主键       -- 班级编号
+       class_name char(20) 非空 唯一  -- 班级名称
+       department_name char(20)  非空 -- 院系名称
+
+  create table classes(
+    class_no int auto_increment primary key,
+    class_name char(10) unique not null,
+    department_name char(20) not null
+  );
+ 6.2 创建教师表
+  表名:teacher
+  字段: teacher_no char(10) 主键      -- 教师工号
+       teacher_name char(10) 非空     -- 教师姓名
+       teacher_contact char(20) 非空  -- 联系方式
+  create table teacher(
+    teacher_no char(10) primary key,
+    teacher_name char(10) not null,
+    teacher_contact char(20) not null
+  );
+ 6.3 创建学生表
+  表名: student
+  字段: student_no char(11) 主键
+        student_name char(10) 非空
+        student_contact char(20) 非空
+        class_no int 外键
+ 
+  create table student(
+     student_no char(11) primary key,
+     student_name char(10) not null,
+     student_contact char(20) not null,
+     class_no int,
+     constraint student_class_fk foreign key(class_no) references classes(class_no)
+  );
+
+ 6.4 创建课程表
+  表名: course
+  字段: course_no int 自增长 主键
+       course_name char(16) 非空
+       up_limit int 默认 60
+       description varchar(100) 非空
+       status char(6) 默认 未审核
+       teacher_no char(10) 非空 唯一 外键
+   create table course(
+     course_no int auto_increment primary key,
+     course_name char(16) not null,
+     up_limit int default 60,
+     description varchar(100) not null,
+     status char(6) default '未审核',
+     teacher_no char(10) unique not null,
+     constraint course_teacher_fk foreign key(teacher_no) references teacher(teacher_no) 
+   ); 
+  6.5 创建选课表
+   表名: choose
+   字段: choose_no int 自增长 主键
+        student_no char(11) 非空 外键
+        course_no int 非空 外键
+        score tinyint unsigned
+        choose_time datetime 非空
+   create table choose(
+     choose_no int auto_increment primary key,
+     student_no char(11) not null,
+     course_no int not null,
+     choose_time datetime not null,
+     score tinyint unsigned,
+     constraint choose_student_fk foreign key(student_no) references student(student_no),
+     constraint choose_course_fk foreign key(course_no) references course(course_no)
+   );
+
+练习:完成"选课系统"数据库的创建,并熟悉各表中的字段及其表之间的关系.
+        
+
+
+
+  
+
+
+
+
+ 
+
+
+
+
+
+
+
+
+

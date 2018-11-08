@@ -1,0 +1,109 @@
+// 1 签名过程，交易的命令行接口函数
+func (cli *CLI) send(from, to string, amount int) { 
+    // 1.1 产生普通交易
+    tx := NewUTXOTransaction(from, to, amount, bc){
+        // 根据发送方的地址，从文件中读取与地址对应的钱包 
+        wallet := wallets.GetWallet(from)
+        // 使用地址对应的私钥对交易进行签名
+        bc.SignTransaction(&tx, wallet.PrivateKey){
+             // 签名是对所有的交易输入进行签名，交易输入会引用前几笔交易的交易输出
+             tx.Sign(privKey, prevTXs){
+                  //使用私钥对交易数据的Hash进行签名，得到rs
+                  r, s, err := ecdsa.Sign(rand.Reader, &privKey, txCopy.ID)
+                  // 生成签名
+                  signature := append(r.Bytes(), s.Bytes()...)
+                  // 保存签名
+                  tx.Vin[inID].Signature = signature
+             }//到此为止，签名数据，发送方的公钥，签名前明文数据（发送者，接收者，币值）
+        }
+    }
+    // 1.2 将交易打包到区块链中
+    bc.MineBlock([]*Transaction{tx}){
+         bc.VerifyTransaction(tx){
+             return tx.Verify(prevTXs){
+                    
+                    // 1 接收者自己根据明文数据计算Hash
+	    txCopy.ID = txCopy.Hash()
+
+                    // r保存签名的前半部分
+	    r.SetBytes(vin.Signature[:(sigLen / 2)])
+	     // s是保存签名的后半部分
+	    s.SetBytes(vin.Signature[(sigLen / 2):]) 
+                    //定义两个大整数，保存公钥的
+	     x := big.Int{}
+	     y := big.Int{}
+	     keyLen := len(vin.PubKey)
+	      //x 保存公钥的前半部分，y保存公钥后半部分
+	     x.SetBytes(vin.PubKey[:(keyLen / 2)])
+	     y.SetBytes(vin.PubKey[(keyLen / 2):])
+                     rawPubKey := ecdsa.PublicKey{curve, &x, &y}
+                     //调用Verify函数，使用rawPubKey解密rs，得到一个Hash值，
+                     // 并且和第二个参数比较，验证交易数据的正确性
+                     if ecdsa.Verify(&rawPubKey, txCopy.ID, &r, &s) == false {
+			return false
+	      }
+ 
+             }
+                
+         }
+    }
+} 
+--------------------------------------------------------------------------------
+未花费交易集(UTXOSet)
+1. 创建区块链时，重新构建UTXOSet,目的是创建UTXOSet数据，保存到数据库中
+func (cli *CLI) createBlockchain(address string){
+     bc := CreateBlockchain(address)
+     UTXOSet := UTXOSet{bc}
+     UTXOSet.Reindex()  
+}
+2.普通交易中
+func (cli *CLI) send(from, to string, amount int) { 
+
+      // 创建未花费交易输出集(UTXOs)
+      UTXOSet := UTXOSet{bc} 
+      tx := NewUTXOTransaction(from, to, amount, &UTXOSet){
+            // 提高执行效率
+            UTXOSet.FindSpendableOutputs(pubKeyHash, amount)
+      }
+      // 调用MineBlock，产生新块，保存到数据库中
+      newBlock := bc.MineBlock(txs)
+      // 更新UTXO集，同步区块链数据和UTXOSet的数据
+      UTXOSet.Update(newBlock)
+
+}
+3. 获取指定地址余额
+func (cli *CLI) getBalance(address string) {
+     UTXOSet := UTXOSet{bc}
+     //使用UTXOSet替代区块链的相关函数,提高执行效率
+     UTXOs := UTXOSet.FindUTXO(pubKeyHash)
+}
+
+------------------------------------------------
+1GkA4fgS9Bn1VvQTdNQsMbptsusgfViqGi     张三
+1ABfu2qUT9g41gXbVMdj54cbwcxDD5zLLQ   李四
+1EMzAJKFb4ZSnH746koHaC5neWuaHCuSHq  王五
+首先 张三创建创世块，创币交易有一个输出 10，被引用，变成已花费
+张三发送2个比特币给李四 ，创币交易(有一个输出10)，普通交易（两个输出，张三8，李四2[已花费]） 
+最后，李四发送一个比特币给王五，创币交易（有一个输出10），普通交易(两个输出，李四1，王五1) 
+在UTOXSet中，交易的数量是4
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

@@ -1,0 +1,189 @@
+1.复制表结构
+ 1.1  create table 表名 like 源表;
+ 1.2  create table 表名 select * from 源表;
+2.修改表结构
+  alter table c1 add userid char(18) after id;
+  alter table c1 modify userid int;
+  alter table c1 drop userid;
+
+  alter table c1 add constraint c1_name_u unique(name);
+  alter table c1 drop index c1_name_u;
+
+  alter table c1 rename child;
+  rename table c2 to c4;
+3.dml语句
+ 3.1 insert语句
+  # 向classes表中写入数据
+   insert into 
+     classes(class_no,class_name,department_name)
+       values(null,'2017自动化1班','机电工程');
+   insert into classes(class_name,department_name)
+       values('2017自动化2班','机电工程');
+   insert into classes
+       values(null,'2017自动化3班','机电工程');
+  # 向teacher表中写入数据
+   insert into teacher values('001','张老师','11000000000');
+   insert into teacher values('002','李老师','12000000000');
+   insert into teacher values('003','王老师','13000000000');
+  # 向课程表中写入数据
+   insert into course values
+      (null,'java语言',default,'暂无','已审核','001'),
+      (null,'MySQL数据库',150,'暂无' ,'已审核','002'),
+      (null,'C语言',230,'暂无','已审核','003');
+  # 向student表中写入数据
+   insert into student 
+      values('2017001','张三','15000000000',1);
+   insert into student
+      values('2017002','李四','16000000000',1);
+   insert into student
+      values('2017003','王五','17000000000',3);
+   insert into student
+      values('2017004','赵六','18000000000',2);
+   insert into student
+      values('2017005','田七','19000000000',2);
+  # 插入多行数据
+   create table stu like student;
+   insert into stu(student_no,student_name,student_contact)
+     select student_no,student_name,student_contact 
+       from student;
+ 3.2 update语句
+  update score set c_score=c_score + 5;
+  update score set c_score=100 where c_score>100;
+
+  update stu set student_name='张三丰',class_no=2
+     where student_no='2017001';
+
+  update student set student_name='test',student_contact='1111',class_no=10
+    where class_no=1;
+  update classes set class_no=4 where class_no=1;
+ 3.3 delete语句
+  delete from stu where student_no='2017001';
+  
+  -- 创建测试表
+  create table test(
+    id int auto_increment primary key,
+    name varchar(10));
+  -- 插入测试数据
+  insert into test(name) values('张三');
+  insert into test(name) values('李四');
+  insert into test(name) values('王五');
+  -- 使用delete 删除数据时,自增长字段继续编号
+  delete from test;
+  insert into test(name) values('张三'); -- id为4
+  -- 使用truncate截断表,自增长字段重新编号
+  truncate table test;
+  insert into test(name) values('张三'); -- id为1
+
+4. select语句
+ 4.1 基本查询语言
+  4.1.1 
+  select * from student;
+  select student_no,student_name from student;
+  select student_no as 学号,student_name 姓名 from student;
+  4.1.2 使用distinct排重
+  select department_name 院系 from classes;
+  select distinct department_name 院系 from classes;
+  select distinct class_no,department_name 院系 from classes;
+  4.1.3 使用limit实现分页
+  以系统数据库information_schema中的tables为例.
+  desc information_schema.tables;
+  # 列出第一页(每页10行)
+  select table_schema,table_name,table_rows
+     from information_schema.tables limit 10;
+  # 列出第二页
+  select table_schema,table_name,table_rows
+     from information_schema.tables limit 10,10;
+ 4.2 表连接
+  4.2.1 内连接
+   1) # 添加测试数据
+    insert into classes values(4,'计算机1班','信息学院');
+    insert into student 
+       values('2017006','小刘','20000000000',null);
+   2) 列出学生及其所在班级的信息
+    select student.student_no 学号,student.student_name 姓名,
+       classes.class_name 班级,classes.department_name 学院
+     from classes inner join student 
+       on student.class_no = classes.class_no;
+    # 表的别名
+    select s.student_no 学号,s.student_name 姓名,
+       c.class_name 班级,c.department_name 学院
+     from classes c inner join student s
+       on s.class_no = c.class_no;
+
+    select student_no 学号,student_name 姓名,
+       class_name 班级,department_name 学院
+     from classes c inner join student s
+       on s.class_no = c.class_no;
+
+   练习:列出教师及其所授课程的信息
+    select t.teacher_no t_no,
+        teacher_name t_name,c.course_name c_name
+      from teacher as t join course c
+         on t.teacher_no = c.teacher_no;
+   注意:在SQL语句中,表一旦命名别名,则该语句中只能使用别名,不能使用原表名.
+  4.2.2 外连接
+   1) 左外连接
+     select s.student_no 学号,s.student_name 姓名,
+       c.class_name 班级,c.department_name 学院
+      from  student s left join classes c
+        on c.class_no = s.class_no;
+   2) 右外连接
+     select s.student_no 学号,s.student_name 姓名,
+       c.class_name 班级,c.department_name 学院
+      from  student s right join classes c
+        on c.class_no = s.class_no;
+   3) 完整外连接(全外连接)--目前MySQL不支持
+      full join ... on 
+
+练习: 用teacher表和course表测试外连接
+  # 向teacher表中添加测试数据
+   insert into teacher values('004','杨老师','21000000000');
+  # 外连接
+   select t.teacher_no,t.teacher_name,c.course_name
+     from teacher t left join course c
+       on t.teacher_no=c.teacher_no;
+   select t.teacher_no,t.teacher_name,c.course_name
+     from course c right join teacher t 
+       on t.teacher_no=c.teacher_no;
+  4.2.3 多表连接
+   # 向选课表 choose表中插入如下测试数据
+    1     2017001      1    now()               40
+    2     2017002      1    now()               50
+    3     2017001      2    now()               60
+    4     2017003      3    now()               70
+    5     2017004      2    now()               80
+    6     2017005      1    2018-09-02 12:00:00 90
+    7     2017003      1    now()               NULL
+
+   insert into choose values(null,'2017001',1,now(),40);
+   insert into choose values(null,'2017002',1,now(),50);
+   insert into choose values(null,'2017001',2,now(),60);
+   insert into choose values(null,'2017003',3,now(),70);
+   insert into choose values(null,'2017004',2,now(),80);
+   insert into choose values(null,'2017005',1,
+     '2018-09-02 12:00:00',90);
+   insert into choose values(null,'2017003',1,now(),null);
+
+ 练习: 使用三表内连接,列出学生的学号、姓名、所在班级名称、成绩
+  语法:
+   select 字段列表
+     from 表1 join 表2 on  连接条件1
+              join 表3 on  连接条件2;
+  
+   select s.student_no 学号,s.student_name 姓名,
+      c.class_name 班级名称,ch.score 成绩
+     from student s 
+         join classes c on s.class_no=c.class_no 
+         join choose ch on s.student_no=ch.student_no;  
+  
+
+
+
+
+
+
+
+
+
+
+

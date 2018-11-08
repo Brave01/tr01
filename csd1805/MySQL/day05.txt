@@ -1,0 +1,349 @@
+1.临时表
+ 1.1 创建临时表
+  create temporary table temp(
+    id int primary key,
+    name char(10) not null
+  );
+  insert into temp values(1,'t1');
+  select * from temp;
+2.存储过程 procedure
+ 2.1 创建
+  # 创建存储过程，根据传入的学号，统计该生选修的课程数。
+  delimiter $$
+  create procedure get_choose_count_proc(
+    in stu_no char(10),out choose_count int)
+  begin
+    select count(course_no) into choose_count from choose
+      where student_no=stu_no;
+  end
+  $$
+  delimiter ;
+ 2.2 调用
+  set @stu_no = '2017001';
+  set @choose_count = 0;
+  call get_choose_count_proc(@stu_no,@choose_count);
+  select @choose_count;
+
+ 2.3 改写上面的存储过程，使用inout参数代替两个参数
+  delimiter $$
+  create procedure get_choose_count2_proc(
+    inout num int)
+  begin
+    select count(*) into num from choose
+       where student_no=num;
+  end;
+  $$
+  delimiter ;
+ 2.4 参数的三种模式
+  in    输入参数 负责向过程传入数据
+  out   输出参数 负责调用后带回结果
+        (作用相当于函数的返回值)
+        参数必须是变量
+  inout 输入输出参数，既负责传入数据，有负责传出数据
+        参数必须是变量，并且必须赋值
+ 2.5 练习：创建一个存储过程，根据传入的学号显示选修课程的信息，包括课程名、授课教师名和选课时间。
+delimiter $$
+create procedure get_student_course_proc(
+   stu_no int)
+begin
+  select course_name,teacher_name,choose_time
+    from course c,teacher t,choose ch
+    where t.teacher_no=c.teacher_no 
+    and c.course_no = ch.course_no
+    and ch.student_no=stu_no;
+end
+$$
+delimiter ;
+
+ 2.6 查看存储过程
+  show procedure status\G
+  show procedure status like '%count%'\G
+  select name from mysql.proc where db='choose'
+   and type='procedure';
+ 2.7 删除存储过程
+  drop procedure get_student_course_proc;
+3.错误处理
+ 3.1 使用预定义错误触发条件
+   预定义错误触发条件：sqlexception、sqlwarning、not found
+   # 创建存储过程，根据传入的教师编号和课程名 实现想course表中插入一行数据，如果teacher_no已经存在，提示错误信息
+   delimiter $$
+   create procedure course_proc(
+     c_name char(16),t_no char(10))
+   begin
+     declare continue handler for sqlexception
+       begin
+          select 'sql语句出现异常';
+       end;
+     insert into course(course_name,description,teacher_no)
+        values(c_name,'暂无',t_no);
+   end;
+   $$
+   delimiter ;
+
+  3.2 使用 MySQL错误号
+   delimiter $$
+   create procedure course2_proc(
+     c_name char(16),t_no char(10))
+   begin
+     declare continue handler for 1062
+       begin
+          select 'sql语句出现异常';
+       end;
+     insert into course(course_name,description,teacher_no)
+        values(c_name,'暂无',t_no);
+   end;
+   $$
+   delimiter ;
+
+ 3.3 自定义错误触发条件
+   delimiter $$
+   create procedure course3_proc(
+     c_name char(16),t_no char(10))
+   begin
+     declare unique_error condition for 1062;
+     declare continue handler for unique_error
+       begin
+          select '违反了唯一约束' error;
+       end;
+     insert into course(course_name,description,teacher_no)
+        values(c_name,'暂无',t_no);
+   end;
+   $$
+   delimiter ;
+
+4.游标 cursor
+ 4.1 作用
+  用来处理多行结果集
+ 4.2 使用步骤
+  声明游标
+  打开游标
+  提取数据
+  关闭游标
+ 4.3 案例
+  delimiter $$
+  create procedure update_score_proc(c_no int)
+  begin
+   # 声明变量
+   declare s_no char(10); # 接收学号
+   declare grade int;     # 接收成绩
+   declare state char(10);# 循环退出条件的变量
+   # 声明游标
+   declare score_cursor cursor for select student_no,score
+       from choose where course_no=c_no;
+   # 错误处理
+   declare continue handler for not found
+   begin
+     set state='error';
+   end;  
+   open score_cursor;# 打开游标
+   # 循环提取并更新数据
+   repeat
+     fetch score_cursor into s_no,grade;  # 提取数据
+     set grade = grade + 5;
+     if grade>100 then set grade = 100; end if;
+     if grade>=55 and grade<=59 then set grade = 60;end if;
+     update choose set score=grade
+        where student_no=s_no and course_no=c_no;
+     until state='error'
+   end repeat;
+   close score_cursor;  # 关闭游标
+  end
+  $$
+  delimiter ;
+5. 预定义SQL语句
+ 5.1 预定义SQL语句的使用步骤
+  1）创建预定义SQL语句
+  prepare s from 'select * from student';
+  2） 执行预定义SQL语句
+  execute s;
+  3） 释放预处理SQL语句
+  deallocate prepare s;
+ 5.2 带有占位符的预处理SQL语句
+ prepare s from 
+ 'select * from choose where course_no=? and student_no=?';
+ 
+ set @c_no=1;
+ set @s_no='2017001';
+ execute s using @c_no,@s_no;
+ 注意：using后面必须是会话变量，不能使用局部变量或值。
+ 
+ 5.3 案例：创建存储过程，根据参入的参数实现数据库表的复制
+  把源数据库中的指定表的表结构和表数据复制到制定数据库中
+  
+  create table 目的数据库名.表名 like 源数据库名.表名;
+  insert into 目的数据库名.表名 select ... from 源数据库名.表名;
+  
+  delimiter $$
+  create procedure copy_table_proc(
+   from_db char(20),from_table char(20),
+   to_db char(20),to_table char(20))
+  begin
+   set @create_table=
+    concat('create table ',to_db,'.',to_table,' like ',
+      from_db,'.',from_table);
+   set @insert_table=
+    concat('insert into ',to_db,'.',to_table,
+   ' select * from ',from_db,'.',from_table);
+   prepare s1 from @create_table;
+   execute s1;
+   prepare s2 from @insert_table;
+   execute s2;
+   deallocate prepare s1;
+   deallocate prepare s2;
+  end;
+  $$
+  delimiter ;
+
+6.事务机制
+ 6.1 事务的必要性
+  6.1.1. 创建测试表（账号表）
+   create table account(
+     account_no int auto_increment primary key,
+     name char(10) not null,
+     balance int unsigned
+   );
+  6.1.2 插入测试数据
+   insert into account(name,balance) values('甲',1000);
+   insert into account(name,balance) values('乙',1000);
+  6.1.3 创建存储过程，实现转账功能
+   delimiter $$
+   create procedure transfer_proc(
+    from_account int,to_account int,money int)
+   begin
+    update account set balance=balance+money 
+              where account_no=to_account;
+    update account set balance=balance-money
+              where account_no=from_account;
+   end;
+   $$
+   delimiter ;
+  6.1.4 测试存储过程
+   call transfer_proc(1,2,800);
+   select * from account;
+  6.1.5 再次调用存储过程
+   call transfer_proc(1,2,800);
+   select * from account;
+
+ 6.2 关闭MySQL的自动提交
+  1）显式关闭自动提交
+   # 查看
+    show variables like 'autocommit'; 
+   # 关闭
+    set autocommit = 0;
+  2) 隐式关闭自动提交
+    start transaction;  # 开始事务
+ 6.3 回滚
+  语法：rollback;
+   
+  set autocommit = 0;
+  update account set balance=balance+800 
+      where account_no=2;
+  select * from account;
+ 6.4 提交
+  1）显式提交
+   commit;
+
+   set autocommit = 0;
+   update account set balance=balance+800 
+      where account_no=2;
+   select * from account;
+  2) 隐式提交
+ 6.5 事务
+  1）使用事务改写 转账 的存储过程
+   drop procedure transfer_proc;
+   delimiter $$
+   create procedure transfer_proc(
+    from_account int,to_account int,money int)
+   begin
+    declare continue handler for 1690
+    begin
+     rollback;
+    end;
+    start transaction;
+    update account set balance=balance+money
+                  where account_no=to_account;
+    update account set balance=balance-money
+                  where account_no=from_account;
+    commit;
+   end;
+   $$
+   delimiter ;
+ 6.6 保存点
+  实现事务的部分提交、部分撤销
+  语法：
+    savepoint 保存点名;
+    rollback to 保存点名;
+  案例1：向 account表中插入账号no一样的数据(违反了主键约束)
+  delimiter $$
+  create procedure save_point_proc()
+  begin
+   declare continue handler for 1062
+   begin
+     rollback to B;
+     rollback;
+   end;
+   start transaction;
+   insert into account values(null,'丙',1000);
+   savepoint B;
+   insert into account values(last_insert_id(),'丁',1000);
+   commit;
+  end;
+  $$
+  delimiter ;
+
+  # 更改上面的案例，实现部分提交、部分回滚 
+  delimiter $$
+  create procedure save_point2_proc()
+  begin
+   declare continue handler for 1062
+   begin
+     rollback to B;
+     commit;
+   end;
+   start transaction;
+   insert into account values(null,'丙',1000);
+   savepoint B;
+   insert into account values(last_insert_id(),'丁',1000);
+   commit;
+  end;
+  $$
+  delimiter ;
+
+练习：创建存储过程，根据传入的学号，显示学生的姓名、所在班级和所选课程
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

@@ -1,0 +1,53 @@
+开发流程：
+1）需求分析
+2）概要设计
+3）详细设计
+4）编写代码
+5）测试运行
+6）代码重构
+7）产品发布
+8）升级维护
+
+项目《HTTP客户端》
+实现从“http://code.tarena.com.cn/”下载代码
+1）实现代码下载主界面
+2）增加登陆认证对话框
+3）处理子目录链接
+4）实现对指定格式文件的下载
+
+HTTP简介：
+1）请求(request):客户端给服务器发送消息
+--》请求行(request-line)
+--》请求头(headers)
+--》空行(blank line)
+--》可选消息体(request-body)
+
+2）响应(response):服务器给客户端发送消息
+--》响应头行/状态行(response-line)
+--》响应头域(response)
+--》空行(blank line)
+--》消息体(body)
+
+QT相关类
+1）QNetworkAccessManager //管理请求和响应
+2）QNetworkRequest //请求
+3）QNetworkReply	//响应
+4）QUrl	//网络地址
+5）QFile/QFileInfo //文件编程
+6）QTextBrowser //文本浏览器(显示组件)
+7）QProgressBar //进度条(显示组件)
+
+工程名：HttpClient
+类名：MainWindow(默认)
+
+//忽略下面提示
+qt.network.ssl: QSslSocket: cannot resolve SSLv2_client_method
+qt.network.ssl: QSslSocket: cannot resolve SSLv2_server_method
+
+http://code.tarena.com.cn/
+http://code.tarena.com.cn/CSDCode/
+
+总结：
+不足：不能同时处理多个连接请求
+扩展：通过多线程，支持多个连接同时处理，可以实现多个文件同时下载。
+

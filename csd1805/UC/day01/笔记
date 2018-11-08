@@ -1,0 +1,198 @@
+UC  UNIX/C
+王建立
+C语言   unix操作系统 linux操作系统
+linux命令 ???
+C语言 基础如何??
+
+C语言   李老师      数据结构  杨老师
+
+数据结构是用来封装数据类型的.
+数据结构  网络原理  计算机原理   操作系统
+
+C语言回顾
+if...else...
+while (){}
+do...while...
+switch...case...
+for(;;)...
+
+int p;//定义了整型类型的变量p.
+名字   地址  空间里的内容
+常量也有自己的地址  空间
+
+常量和变量的区别
+char v='c'; 'c'的ascii码存放到内存中
+
+大端和小端的问题  查百度
+
+
+数据类型   类型的内存布局 跟这种类型相关的操作
+int short  long char double float 
+
+*  指针类型    
+指针就是地址. error
+int *p;   
+int arr[3];  数组也是一种类型.
+arr是数组的名字,数组的首地址.
+int [3]  数据类型  自定义的数据类型
+
+补充:
+typedef的使用
+1  定义类型的变量
+ int count_t;
+2  在第一步的前边加上typedef.原来的变量就是原来的类型的别名
+ typedef int count_t;   count_t 就是int类型的别名
+
+3  使用新的名字定义变量
+ count_t c;====int  c;
+
+typedef int count_t;//给类型起别名
+
+int arr_t[3];
+arr_t 是常量
+int[3]  是类型
+
+typedef int arr_t[3];//arr_t是新的名字,也是类型的别名.
+
+arr_t是类型   int[3]
+arr_t a;  a是什么?   int a[3];
+arr_t b[2];  b是数组的名字,数组有两个元素.每个元素是arr_t 类型的.
+int b[2][3]={{1,2,3},{4,5,6}}
+int b[2][3]={1,2,3,4,5,6}
+arr_t b
+int b[0][3]  b[1]
+b[0]是数组的名字,也是数组的首地址.int访问方式
+b[0]+1  
+b[0]===*b
+
+b  int[3]
+*b int
+取出5.
+*(*(b+1)+1)
+*(*b+4)
+*(*(b+2)-2)
+
+char *str[3];
+str是数组的名字.数组有3个元素,每个元素是什么类型的? *
+指针数组.
+字符串列表
+int main(int argc,char *argv[]);
+
+int (*p)[3];数组指针
+p是指针类型的变量.访问p的时候,*
+*p   int[3]
+p+1  12个字节
+
+
+函数的问题
+函数也是一种数据类型.
+int add(int x,int y);
+add是函数的名字,函数的入口地址
+int (int x,int y)  类型
+typedef int add(int x,int y);
+add  f1;
+add *p;
+typedef int (*fun_t)(int x,int y);
+fun_t f1;===add *p;
+  
+结构体
+struct node{
+	int data;
+	struct node *next;
+};
+
+typedef struct node node_t;
+typedef node_t *list_t;
+
+list_t h,n;======= node_t *h,*n;
+list_t head=NULL;
+
+
+list_t list_init(list_t h);
+list_t list_destroy(list_t h);
+node_t *find_node(list_t h,int key);
+
+关于补码的问题
+UC课程
+一 unix操作系统
+什么是操作系统?
+管理硬件资源  软件资源  一款软件
+计算机的操作系统
+管理计算机的硬件资源和软件资源的一款软件.
+
+软件是逻辑的  虚拟的
+软件是对硬件的控制.硬件是物理存在的.真实的
+
+计算机的操作系统包含哪些子系统呢?
+CPU   管理CPU 进程
+内存   管理内存  内存管理
+硬盘  管理硬盘   文件系统
+网卡  管理网卡  网络通讯
+显卡  声卡  ...   文件来管理   文件管理
+线程管理
+中断管理   信号
+进程管理  
+
+如果了解函数?
+函数的功能
+函数的返回值
+参数的意义以及参数的类型和个数.
+
+bash是计算机和用户交互的窗口
+系统调用  open(2) write(2)
+库函数  printf(3)  bzero(3)
+linux命令  ls(1) cat(1)
+
+
+#include <stdio.h>
+#include <string.h>
+#include <strings.h>
+
+int main(void){
+	printf("hello beijing\n");
+	strcpy();
+	bzero();	
+	return 0;
+}
+
+预处理指令?
+
+
+
+库函数  标准库函数   第三方库函数
+man 1 command
+man 2 system call
+man 3 库函数
+
+计算机的操作系统
+数据类型   
+typedef的使用
+系统提供的类型  自己DIY的类型
+指针类型
+大端和小端
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

@@ -1,0 +1,257 @@
+蒋贵良
+jianggl@tedu.cn
+----------------
+标准C++(11天)
+QT(8天)
+----------------
+《C++程序设计原理与实践》
+《C++ Primer》
+==========================
+一 C++语言概述
+1 历史背景
+1)C++江湖地位
+  java、C、C++
+2)C++之父：Bjarne Stroustrup(1950--)
+  1979,Cpre,为C语言增加类的机制
+  1983,发布全新的编程语言C with class，后来命名为C++。
+  1985，CFont1.0 
+  		《The C++ Programming Language》
+3）C++发展过程
+  1987，GNU C++
+  1990，Borland C++(BC)
+  1992，Mircosoft C++(VC) 
+  	     IBM C++ 1.0
+  	     ...
+  1998，ISO C++98
+  2003，对C++98进行修订，C++03
+  2011，ISO C++11
+  2014，ISO C++14
+  2017，ISO C++17
+  *2020，ISO C++20
+
+2 应用领域
+1）游戏开发
+2）科学计算
+3）网络通信(ACE)
+4）操作系统和设备驱动
+5）其它...
+
+3 C和C++
+1）都是编译器语言，都采用静态编译的模式
+2）都是强类型语言，但是C++更强
+3）C++去除了C中一些不好的语法特性
+4）C++增加很多C中没有的好的特性，全面支持面向对象，更适合大型软件的开发。
+
+二 第一个C++程序
+1 编译方式
+1) gcc xx.cpp -lstdc++
+2) g++ xx.cpp //推荐
+
+2 文件扩展名
+1）.cpp //推荐
+2）.cc
+3）.C
+4）.cxx
+
+3 头文件
+#include <iostream>
+注：C++中所有和I/O相关的都在改头文件中
+注：C++开发中依然可以使用C中的头文件，但是为了符合C++编程风格，提供一套不带".h"后缀的替换版本。
+  #include <stdio.h> ==> <cstdio>
+  #include <string.h> ==> <cstring>
+  #include <stdlib.h> ==> <cstdlib>
+  ...
+4 标准输入和输出
+1）用cin对象表示标准输入
+eg：
+	int num;
+	scanf("%d",&num);//C
+	cin >> num;//C++
+	注：">>"称为提取(输入)操作符
+   ------------------------
+   int i;
+   double d;
+   scanf("%d%lf",&i,&d);//c
+   cin >> i >> d; //C++
+   
+2）用cout对象表示标准输出
+eg:
+	int num = 123;
+	printf("%d\n",num);//C
+	cout << num << endl;//C++
+	注："<<"称为插入(输出)操作符
+	注："endl"流控制符表示行结束，类似“\n”
+	------------------------
+	int i = 123;
+	double d = 4.56;
+	printf("%d,%lf\n",i,d);
+	cout << i << ',' << d << endl;
+	------------------------
+	cout << "hello world" << endl;
+5 "std::"标准名字空间
+
+三 名字空间(namespace)
+1 名字空间作用
+1）避免名字冲突
+2）划分逻辑单元
+
+2 名字空间的定义
+namespace 名字空间名{
+	名字空间成员1;
+	名字空间成员2;
+	...
+	名字空间成员n;
+}
+注：名字空间成员可以是全局变量、全局函数、类型、名字空间；
+eg：
+  namespace ns1{
+  		int g_num = 123;
+  }
+  namespace ns2{
+  		int g_num = 456;
+  }
+3 名字空间成员的使用
+1）通过作用域限定操作符 "::"
+	空间名::要访问的成员;
+eg：
+	cout << ns1::g_num << endl;//123
+	cout << ns2::g_num << endl;//456
+
+2）名字空间指令
+	using namespace 空间名;
+	在该条指令以后，指定名字空间的成员都可见，可以直接访问，省略“空间名::”。
+
+3）名字空间声明
+	using 空间名::名字空间成员;
+	将名字空间中特定的一个成员声明到当前作用域，在该作用域中访问这个成员就如同是访问局部成员一样，可以直接访问，省略“空间名::”.
+	
+4 无名名字空间
+	不属于任何名字空间的标识符，将被编译器自动放入无名名字空间中，无名空间里面的成员可以直接访问；但是如果无名空间里面成员和局部成员名字一样，优先访问局部的成员，这时如果还想访问到无名空间里面的成员可以加“::”。
+	
+5 名字空间嵌套//了解
+eg:
+	namespace ns1{
+		int num = 100;
+		namespace ns2{
+			int num = 200;
+			namespace ns3{
+				int num = 300;
+			}
+		}
+	}
+	cout << ns1::num << endl;//100
+	cout << ns1::ns2::num << endl;//200
+	cout << ns1::ns2::ns3::num << endl;//300
+
+四 C++中结构体、联合体和枚举
+1 结构体
+1）当定义结构体变量时可以省略struct关键字
+2）C++的结构体中可以直接定义函数，称为成员函数，在成员函数里面可以访问结构体中的其它成员。
+	struct HttpRequest{
+		...
+	};
+	struct HttpRequest req1;//C
+	struct HttpRequest req2;
+	-------------
+	typedef struct HttpRequest REQUEST;//C
+	REQUEST req1;
+	REQUEST req2;
+	-------------
+	HttpRequest req1;//C++
+	HttpRequest req2;
+	
+2 联合体(union) //了解	
+1）当定义联合体变量时可以省略union关键字
+2）C++中支持匿名联合	
+	
+	
+3 枚举(enum)
+1）定义枚举类型变量可以省略enum关键字
+2）C++的枚举是一种独立的数据类型，而C中的枚举的本质就是整型数。
+
+  state:运行、睡眠、停止
+  int：0表示运行 1表示睡眠 2表示停止
+   enum STATE{RUN,SLEEP,STOP};
+  
+  return 0(失败)、1(成功)
+   enum RESULT{ERROR,SUCCESS};
+	
+五 C++字符串
+1 回顾C中字符串
+1）常量字符串 "hello"
+2）字符指针	char*
+3）字符数组	char []
+eg:
+  	char *p1 = "hello";
+  	char *p2 = "world";
+  	strcpy(p1,p2);//段错误
+  	-----------------------
+  	char *p = "hello world!";
+  	char arr[] = "abcdef";
+  	strcpy(arr,p);//内存越界
+  	-----------------------
+  	const char *p = "hello";
+  	//arr:char * const
+  	char arr[] = "world";
+  	p = arr;//ok
+  	arr = p;//error
+  	-------------------------
+  	strcmp()、strcat()、strlen()
+  
+    
+2 C++兼容C中字符串同时，增加string类型专门表示字符串。
+1）定义字符串
+	string s;//定义空字符串 ""
+	string s = "hello";//定义同时初始化
+	
+	//下面两种写法本质和上面等价
+	string s = string("hello");
+	string s("hello");
+
+2）字符串拷贝： =  
+	string s1 = "hello";
+	string s2 = "wangjianli";
+	s1 = s2;//拷贝
+	cout << s1 << endl;//"wangjianli"
+   ----------------
+3）字符串连接：+= +
+   string s1 = "hello";
+   s1 += " world";
+   cout << s1 << endl;//hello world
+   --------------------
+   string s1 = "hello";
+   string s2 = "world";
+   string s3 = s1 + s2;
+   cout << s3 << endl;//"helloworld"
+3)字符串比较: == != > < >= <=
+	string s1 = "hello";
+	string s2 = "abcdefg";
+	if(s1 == s2){...} //不成立
+	if(s1 > s2){...}  //成立
+	注：比较字符串大小，不是比较长短而是比较askii码值。
+
+4)随机访问: []
+	string s1 = "hello";
+	s1[0] = 'H';
+	cout << s1 << endl;//"Hello"
+	
+5)常用的成员函数
+	size();//获取字符串的长度
+	length();//和size()等价
+	c_str();//返回C风格的字符串(const char*)
+	
+	练习：使用string表示字符串，从键盘读取一个字符串，统计里面包含多少个字符'a'/'A' ?
+	提示：
+	string str;
+	cin >> str;
+	
+	
+		
+	
+	
+	
+	
+	
+	
+	
+	

@@ -1,0 +1,299 @@
+1.where子句
+ 1.1 单一条件
+  1.1.1 使用比较运算符
+  # 检索'2017自动化2班'的所有学生的信息,列出学号、姓名和班级名称。
+   select student_no,student_name,class_name
+    from student s join classes c on s.class_no=c.class_no
+      where class_name='2017自动化2班';
+  # 列出需要补考的学生的信息
+   select student_no,course_no,score from choose
+     where score<60;
+  1.1.2 实现内连接
+  # 使用 where 子句实现 内连接
+   # 语法：
+    select 字段列表
+      from 表1，表2
+        where 连接条件;
+    select student_no,student_name,class_name
+      from student s,classes c
+        where s.class_no = c.class_no
+          and class_name='2017自动化2班';
+
+   # 使用where子句实现三表内连接
+    select 字段列表
+     from 表1，表2，表3
+       where 连接条件1 and  连接条件2;
+    #列出学生的学号、姓名、所在班级名称和考试成绩
+     select s.student_no,student_name,class_name,score
+       from  student s,classes c,choose ch
+         where s.class_no = c.class_no 
+           and s.student_no = ch.student_no;
+
+  1.1.3 sql中提供的运算符
+    1）between.. and
+      表示一个闭区间  [a,b]
+       where 字段名 between a and b
+      # 列出成绩在[50,60]之间的信息
+      select student_no,course_no,score from choose 
+          where score between 50 and 60;
+    2) is null
+      语法：
+        where 字段名 is null
+      select null=null,null>null,null<null,null!=null;
+      # 列出没有班级的学生
+      select student_no,student_name from student
+        where class_no is null;
+    3) in
+      语法：
+        where 字段名 in(值1,值2,..)
+      # 列出班级编号为1或2的学生
+      select student_no,student_name,class_no from student
+        where class_no in(1,2);
+      # 列出姓张或田 的学生
+      select student_no,student_name,class_no from student
+       where substring(student_name,1,1) in('张','田');
+    4) 模糊查询
+       like '模式'
+       where 字段名 like '...'
+       # 通配符
+       _  : 一个任意字符
+       %  : 任意长度的任意字符
+     
+    # 列出姓 田 的学生的信息
+    select student_no,student_name from student
+       where student_name like '田_%';
+
+   # 在s1( student的复制表) 添加测试数据
+   insert into s1 values('2017007','李_四','22000000000',1);
+   # 从s1表中检索名字以‘李_’开头的学生的信息
+   select student_no,student_name from s1
+    where student_name like '李_%';
+   # 如果要查询的模糊查询的模式表达式中包含通配符，需要进行转义
+    1）   \
+    select student_no,student_name from s1
+    where student_name like '李\_%';
+    2)  自定义转义字符
+      escape '转义字符'
+    select student_no,student_name from s1
+       where student_name like '李!_%' escape '!';
+ 1.2 逻辑运算符
+  1.2.1 使用逻辑与 and 改写 between ... and的案例
+    select student_no,course_no,score from choose
+      # where score between 50 and 60;
+      where score>=50 and score<=60;
+  1.2.2 使用逻辑或 or 改写 in 的案例
+    select student_no,student_name,class_no from student
+      # where class_no in(1,2);
+      where class_no=1 or class_no=2;
+  1.2.3 列出没有学生的班级的信息
+   select c.class_no,class_name from classes c 
+    left join student s on s.class_no=c.class_no
+      where s.student_no is null;
+
+   select  distinct c.class_no,class_name from classes c 
+    left join student s on s.class_no=c.class_no
+      where s.student_no is not null;
+   # 思考题
+   select student_no,student_name,class_no from student
+      where class_no not in(1,2,null);
+   # 上面的语句执行完,结果集为null
+   # 使用 not in(),列表中不能出现null
+   class_no in(1,null)==> class_no=1 or class_no=null
+   class_no not in(1,null)
+       ==> not(class_no=1 or class_no=null)
+       ==> class_no!=1 and class_no!=null
+       ==> null
+2.order by子句
+ 2.1 单列排序
+  select student_no,course_no,score from choose
+    order by score desc;
+ 2.2 排序时,null默认按照最小值处理
+ 2.3 多列排序
+  select student_no,course_no,score from choose
+    order by course_no,student_no desc;
+3.聚合函数
+ 3.1 功能
+   count: 统计一组数据的行数 参数可以是任何类型, 也可以是使用*
+   max: 统计一组数据的最大值
+   min: 统计一组数据的最小值  参数可以是数值 字符串 日期类型
+   sum: 统计一组数据的累加和
+   avg: 统计一组数据的平均值  参数必须是数值类型
+   
+   select count(*) from student where class_no=1; 
+   select max(choose_time),min(choose_time) from choose; 
+   select sum(score) s_score,avg(score) a_score
+       from choose;
+  3.2 聚合函数对null值的处理是忽略
+   select count(class_no),count(*) from student;
+  3.3 聚合函数的参数可以排重(distinct)
+   select count(distinct class_no),count(class_no),
+     count(*)  from student;
+
+ 练习: 列出'张三'各科成绩的平均分
+  select avg(score) from student s join choose ch
+    on s.student_no = ch.student_no
+     where s.student_name='张三';
+  select avg(score) from student s,choose ch
+    where s.student_no = ch.student_no
+     and s.student_name='张三';
+
+4.group by子句
+ 4.1 单列分组
+  # 统计每个班级的人数
+  select class_no,count(student_no) cnt from student
+    group by class_no;  
+  # 统计每个学生的选修课程数、最高分、最低分和总分
+   select student_no,count(course_no) cnt,
+     max(score) maxscore,min(score) minscore,
+     sum(score) sumscore
+    from choose
+      group by student_no;
+
+ 4.2  多列分组
+   select s.student_no,student_name,count(course_no) cnt
+    from choose ch,student s
+      where s.student_no=ch.student_no
+       group by student_no,student_name;
+ 
+   # 筛选出选修课程数大于1的学生，列出学号和选修课程数。
+   /*
+      where子句中不能使用字段或表达式的别名
+      where子句中不能使用聚合函数(组函数)
+   */
+   select student_no s_no,count(course_no) cnt
+    from choose
+     # where count(course_no)>1  错误
+     # where s_no='2017001'　　　　　　错误
+      group by student_no;
+
+  4.3 having子句
+   功能:在分组语句中,根据条件筛选符合条件的组
+   
+   select student_no s_no,count(course_no) cnt
+    from choose
+      group by s_no
+        having cnt>1;
+
+  语法顺序:
+    select          # 字段列表
+     from           # 源表
+      where         # 从源表中根据条件筛选符合条件的行
+       group by     # 根据分组标准把数据分成若干个组
+         having     # 从分组结果中根据条件筛选
+           order by # 对结果集进行排序
+  执行顺序:
+   from
+    where
+     select
+      group by
+        having
+          order by
+
+  4.4 group_concat()函数
+   select group_concat('java','程序','设计') str1,
+          concat('java','程序','设计') str2;
+   
+   select group_concat(student_name) 学生名单,count(*) 人数
+     from student
+       group by class_no;
+
+  4.5 with rollup选项
+   select class_no,count(*) cnt from student
+     group by class_no with rollup;
+
+   select class_no,count(*) cnt from student
+     group by class_no;
+
+5 合并结果集
+  select student_no,student_name,student_contact,class_no
+     from student union
+  select teacher_no,teacher_name,teacher_contact,null
+     from teacher;
+6 子查询
+ 6.1 where子句中
+  6.1.1 子查询的结果为单值
+   # 列出比'2017001'的平均分高的成绩
+   1) 列出'2017001'的平均分
+     select avg(score) avgscore from choose
+       where student_no='2017001';
+     -- 50
+   2) 列出成绩高于50的信息
+     select student_no,course_no,score from choose
+       where score>50;
+   3) 合并上面2条语句
+     select student_no,course_no,score from choose
+       where score>(select avg(score) avgscore from choose
+       where student_no='2017001');
+  6.1.2 子查询的结果为多行单列
+   # 列出'2017自动化1班'学生的成绩
+   select s.student_no,student_name,class_name,score
+     from student s,classes c,choose ch
+       where s.class_no=c.class_no 
+         and s.student_no=ch.student_no
+           and class_name='2017自动化1班';
+   
+   select student_no,course_no,score from choose
+     where student_no in
+    (select student_no
+     from student s,classes c where s.class_no=c.class_no
+       and class_name='2017自动化1班');
+  6.1.3 使用exists
+   select ...
+   where not exists(子查询) # 子查询结果集不为null,表达式结果为真
+   # 检索没有申请选修课的教师的信息
+    select t.* from teacher t left join course c
+      on t.teacher_no=c.teacher_no
+        where c.course_no is null;  
+    select * from teacher t
+     where not exists(select * from course c 
+      where t.teacher_no=c.teacher_no);
+
+  6.2 from子句中使用子查询
+   select * from
+   (select student_no s_no,student_name s_name
+     from student) stu
+     where s_name like '李%';
+   
+   select class_no,count(*) cnt from student
+    group by class_no
+     having cnt>1;
+
+   select * from 
+   (select class_no,count(*) cnt from student
+    group by class_no) c
+     where cnt>1;
+
+练习:把choose复制一份,删除成绩高于'张三'平均分的成绩
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

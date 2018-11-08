@@ -1,0 +1,118 @@
+linux
+    用户名/密码: tarena  tarena
+
+ctrl + alt + t  打开一个终端
+
+每一个用户 在linux 系统有个 主目录(家目录)
+    打开终端默认进入当前用户的家目录
+    tarena@ubuntu:~$
+     用户 @ 主机名:~ 表示主目录 $ 普通用户
+                                # 超级用户
+
+如果是tarena 用户 /home/tarena  
+如果是zhangsan 用户 /home/zhangsan
+
+每一个用户对自己的家目录 有 读写执行的权限
+
+
+ls     list  查看目录下的内容
+    -a   可查隐藏文件
+    -l   查看文件详细信息
+    -lh   打印文件大小以K M G
+d rwx r-x r-x  9    tarena tarena 4.0K Apr 12 17:44 extra
+  文件的权限 连接数  所有者 组用户 大小 时间         文件名
+  r  read  读权限
+  w  write 写
+  x  exe   执行
+  -  没有相应的权限
+
+  第一组 描述的是文件所有者的权限  
+  第二组 描述的是文件组用户的权限
+  第三组 描述的是其他用户的权限
+
+
+
+
+
+d 目录
+- 普通文件
+s 套接字文件
+l 链接文件
+c 字符设备文件
+b 块设备文件
+
+
+mkdir   创建目录
+mkdir  目录名
+
+
+cd   切换目录
+/  根目录   整个系统文件目录 最开始 最顶级的目录
+~  当前用家目录    /home/tarena
+
+文件路径 (文件的位置)
+    可以有两种方式表示
+    绝对路径:从文件的起点(根目录)出发描述文件的位置的方法,跟当前路径无关. /开始的路径
+
+    相对路径:从当前位置出发描述另一个文件的位置.跟当前位置相关,不以/开始
+    .  当前目录  有时候可以省略
+    .. 当前目录的上一级目录
+
+rmdir   删除一个空目录
+rm      删除一个目录/文件
+rm -r  删除目录
+
+[练习]
+    1. 在当前用户的主目录 创建一个 xly 的子目录
+    2. 在xly 目录创建 day01 目录
+    3. tree  /home/tarena/xly
+    /home/tarena/xly
+    └── day01
+
+    4. 创建成功后  删除该目录 用绝对路径在做一次
+
+cp    复制文件 
+     cp  要复制的文件   要粘贴的位置
+     cp -r 要复制的目录   要粘贴的位置
+
+
+     笔记/代码的下载
+     http://code.tarena.com.cn
+     tarenacode
+     code_2015
+
+/CSDCode/csd1805/1806xly/
+
+[练习]
+     1. 从ftp 上下载 day01.txt 到 Downloads 目录
+     2. 将 day01.txt  复制到 xly/day01目录
+     3. 用less 命令进行查看
+
+
+clear  清屏命令   ctrl + l
+
+总结linux命令的格式
+命令名  [选项] [参数]
+cp  Downloads/day01.txt   xly/day01
+
+ls  mkdir 都有选项
+
+man  用于查看 命令/函数 用法
+
+less  
+   查看文件 方法
+   q 退出  
+   空格 下一屏幕
+   jk  一行一行移动
+
+cat   将多个文件连接进行输出
+
+
+mv  move  移动文件/对文件的重命名
+
+
+
+pwd  打印当前工作目录
+
+
+

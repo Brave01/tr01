@@ -1,0 +1,137 @@
+QT(跨平台的C++ GUI应用程序开发框架)
+
+一 Qt概述
+1 历史发展
+1）1991年Havvard Nord和Eirik Chambe-Eng合作编写最初的QT。
+2）1994年Havvard和Eirik创立TrollTech(奇趣科技)
+3）2005年Qt4.0发布
+4）2008年奇趣科技被诺基亚收购
+5）2009年QT源代码开放
+6）2012年诺基亚将全部QT知识产权出售Digia公司
+7）2013年发布QT5.0
+	     7月发布Qt5.1
+	    12月发布Qt5.2
+8）2014年Digia公司成立子公司The Qt company，专注于QT的研发和拓展
+		www.qt.io
+
+2 QT5.4安装
+1）下载QT安装包 “www.qt.io”
+  qt-opensource-linux-x64-5.4.1.run //64位
+  qt-opensource-linux-x86-5.4.1.run //32位
+
+2）运行安装
+  ./qt-opensource-linux-xxx-5.4.1.run
+  注：根据提示默认安装到主目录下
+     “/home/tarena/Qt5.4.1”
+  
+3) 配置环境变量
+  思路：将qt安装目录下的可执行文件所在路径添加到PATH环境变量中
+  可执行文件路径(32系统)：
+  /home/tarena/Qt5.4.1/Tools/QtCreator/bin
+  /home/tarena/Qt5.4.1/5.4/gcc/bin
+  可执行文件路径(64系统)：
+  /home/tarena/Qt5.4.1/Tools/QtCreator/bin
+  /home/tarena/Qt5.4.1/5.4/gcc_64/bin
+  
+sudo vi /etc/environment
+
+PATH="/home/tarena/Qt5.4.1/Tools/QtCreator/bin:/home/tarena/Qt5.4.1/5.4/gcc/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games"
+ 
+注：一定要qt的路径写到前面
+
+4) 重启系统测试
+-->执行“qmake -v”正常可以看到qamke的版本和对应的qt的版本
+-->执行“qtcreator”正常可以进入集成开发环境界面
+  注：可能还需要安装libgl库和libgstreamer
+  sudo apt-get install libgl1-mesa-dev
+  sudo apt-get install libgstreamer0.10-0
+  sudo apt-get install libgstreamer-plugins-base0.10-0
+------------------------------------------  
+3 Qt中主要的工具软件介绍
+1）assistant(Qt助手)
+2）qmake(Qt构建器)
+   qmake -v //查看版本信息
+   qmake -project //生成.pro工程文件
+   qmake //根据.pro文件生成Makefile
+3）designer(Qt设计师)
+  主要用于界面设计，得到.ui(xml)文件
+4）uic(转换器)
+  可以把designer得到的ui文件转换为c++源文件(.h)
+5）rcc(资源编译器)
+6）moc(元对象编译器)
+	将Qt中语法扩展还原为标准C++程序
+7）qtcreator(Qt创造器)
+	QT的集成开发环境(IDE),包含上面所有的工具
+
+4 QT帮助手册的使用
+eg:了解QApplication类的工程和使用方法
+在终端输入命令“assistant”即可启动。
+1）先看第一句话，了解类的功能，细节可以点击“more”，查看详细说明.
+2）接着看,了解头文件(和类名一致),构建选项(QT += widgets),继承关系。
+3）Properties(成员变量)
+4）Public Functions(公有的函数)
+   注：一般要重点关于构造函数
+5）Reimplemented Public Functions(公有虚函数)
+*6）Public Slots(槽函数)//QT语法扩展
+*7）Signals(信号函数)//QT语法扩展
+8）Static Public Members(静态成员)
+9）Reimplemented Protected Functions(保护虚函数
+10）Macros 宏(元对象)
+11）Detailed Description(详细描述)
+
+二 第一个QT程序
+1 创建工程目录
+  mkdir Hello
+  注：每个QT程序都要放在一个独立的目录
+2 进入工程目录，编写代码(C++)
+  cd Hello
+  vi Hello.cpp
+3 构建工程，执行"qmake -project",在工程目录下生成"Hello.pro"的工程文件。
+	QT += widgets
+4 构建工程，执行“qmake”，根据上一步的“.pro”生成编译链接脚本Makefile
+5 执行“make”根据Makefile完成编译和链接，正常可以得到可执行程序"Hello"
+6 测试运行
+  ./Hello
+
+问题1：fatal error: QApplication: 没有那个文件或目录
+解决：在工程文件中添加 “QT += widgets”
+问题2：执行make时死循环，提示“时间错误"
+解决：修改系统时间为正确时间
+
+注：问题改完以后，3、4两步不要重复做，只需要再次执行make即可。
+
+三 QT字符串(QString)和字符编码
+1 常见的字符编码
+1）linux中默认utf-8
+2）windows中默认gbk(gb2312/gbk/gb18030)
+3）QT内部使用QString表示字符串，编码方式unicode
+
+注：在vi编译器查看或设置编码方式
+    :set fileencoding //查看
+    :set fileencoding=gbk //设置
+
+2 QString类
+  QT都是使用QString表示字符串，默认使用unicode编码方式，但是在实际开发写代码时，所用的编码不可能是unicode，一般是utf-8或gbk，如果有“中文字符串”，需要将其转换为unicode编码才能正确显示，否则可能会出现中文乱码。
+  
+  注：如果写代码用的是utf-8,在构建QString字符串是，默认会自动使用fromUtf8函数实现到unicode的编码转换，可以正常显示。
+  
+3 编码转换类：QTextCodec
+1）创建编码对象
+  	QTextCodec* coder = 
+  		QTextCodec::codecForName("GBK");
+2）调用toUnicode转换字符串
+   QString str = 
+   	coder->toUnicode("GBK的中文字符串");
+ 练习：创建QT应用程序，包含一个标签组件(QLabel)和按钮组件(QPushButton)，标签显示文本"我是标签"，按钮显示文本“我是按钮”;
+ 1）构建6步，正常可以看到两个组件同时显示
+ 2）设置编码方式，改成GBK编码
+    :set fileencoding=gbk
+ 3）再次make，显示中文乱码
+ 4）设置编码对象，再次make，结果又正常。
+ 
+ 练习：看帮助手册
+ 	QSlider //滑块
+ 	QSpinBox //选值框
+ 
+ 
+ 

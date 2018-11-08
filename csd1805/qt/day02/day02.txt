@@ -1,0 +1,151 @@
+回顾：
+1 QT概述
+  Qt 4.x.x
+  Qt 5.x.x
+
+2 第一个QT程序
+1）创建工程目录
+2）编写源代码(C++)
+3）qmake -project //xx.pro
+4）qmake //Makefile
+5）make 
+   make clean、make distclean
+6）测试运行
+
+3 QString和字符编码
+  QTextCodec* coder 
+  		= QTextCodec::codecForName("GBK");
+  QString str = coder->toUnicode("中文字符串");
+
+======================================
+今天：
+一 容器窗口(父窗口)
+1 如果一个组件在创建时指定了父窗口，就会停靠在父窗口上面，如果没有指定则飘在外面形成独立的窗体。
+2 常用的父窗口类
+  QWidget
+  QMainWindow(主窗口)
+  QDialog(对话框)
+  注：QWidget和它的子类都可以用于父窗口，但是常用的父窗口类只有上面三个。
+3 QWidget两个常用的函数
+  resize(int x,int y);//调整大小
+  move(int x,int y);//调整位置
+案例：创建一个应用程序，包含一个label和一个pushButton，并让它们停靠在同一个父窗口上面.
+
+二 信号和槽
+1 概念
+  信号和槽是Qt自行定义的一种通信机制，主要用于不同对象之间的数据交互。
+  
+2 语法
+1）信号
+  class XX:public QObject{
+  		Q_OBJECT //moc编译器
+  signals:
+  		void sig_func(..);//信号函数
+  };
+  注:信号函数只需声明，不能定义。
+2）槽
+  class XX:public QObject{
+  		Q_OBJECT //moc编译器
+  public slots:
+  		void sig_func(..);//槽函数
+  };  
+  注：槽函数可以被连接到某个对象的信号函数上，当信号发射后，槽函数将被触发和执行；另外槽函数也可以当做普通成员函数直接调用
+
+3)信号和槽实现
+QObject::connect(
+	const QObject * sender, 
+	const char * signal, 
+	const QObject * receiver, 
+	const char * method);
+参数：
+  @sender：信号发送对象指针
+  @signal：信号函数
+  @receiver：信号的接收对象指针
+  @method：槽函数
+  //将信号函数转换为const char*	
+  SIGNAL(clicked(void));
+  //将槽函数转换为const char*
+  SLOT(close(void));
+
+案例：创建一个QT应用程序，包含一个label和一个pushButton，实现点击按钮关闭标签的功能;
+
+3 信号和槽连接的注意事项
+1）信号和槽参数要一致
+  QObject::connect(A,SIGNAL(sigfunc(int)),
+  		B,SLOT(slotfunc(int)));//ok
+  QObject::connect(A,SIGNAL(sigfunc(int)),
+  		B,SLOT(slotfunc(int,int)));//error
+2)可以带有缺省参数
+  QObject::connect(A,SIGNAL(sigfunc(int)),
+  		B,SLOT(slotfunc(int,int=0)));//ok
+3）信号函数参数可以多，多余的将被忽略
+  QObject::connect(A,SIGNAL(sigfunc(int,int)),
+  		B,SLOT(slotfunc(int)));//ok
+4）一个信号可以连接到多个槽(一对多)
+  QObject::connect(A,SIGNAL(sigfunc(int)),
+  		B1,SLOT(slotfunc1(int)));	
+  QObject::connect(A,SIGNAL(sigfunc(int)),
+  		B2,SLOT(slotfunc2(int)));
+  注：当A发送信号时，B1和B2的槽函数都会被执行，但是执行的顺序不确定。
+5）多个信号连接到同一个槽(多对一)
+  QObject::connect(A1,SIGNAL(sigfunc1(int)),
+  		B,SLOT(slotfunc(int)));//ok
+  QObject::connect(A2,SIGNAL(sigfunc2(int)),
+  		B,SLOT(slotfunc(int)));//ok
+  注：无论是A1还是A2发送信号，B的槽函数都会被执行。
+6）两个信号函数可以直接连接(信号级联)//了解
+  QObject::connect(A1,SIGNAL(sigfunc1(int)),
+  		A2,SIGNAL(sigfunc2(int)));//ok
+  注：当A1发送信号时，A2的信号也将随之发送
+
+案例：事件同步，滑块和选值框保持同步运行
+1）滑块QSlider
+   QSlider(水平/垂直,父窗口);
+   //设置滑块滑动的范围
+   void setRange(int min,int max);
+   //滑块滑动时发送的信号，参数表示当前位置
+   void valueChanged(int)[signal]
+   //设置滑块的位置
+   void setValue(int)[slots];
+2）选值框QSpinBox
+   QSpinBox(父窗口);
+   //设置选值框数值变化范围
+   void setRange(int min,int max);
+   //选值框值改变信号，参数当前的数值
+   void valueChanged(int)[signal]
+   //设置框当前数值
+   void setValue(int)[slots];
+
+三 面向对象的Qt编程
+1 基于对象的Qt编程//不推荐
+2 面向对象的Qt编程
+案例：加法计算器
+思路：
+	class CalculatorDialog:public QDialog{
+		Q_OBJECT //moc
+	public:
+		CalculatorDialog(){
+			//界面初始化
+			//信号和槽连接
+		}
+	public slots:
+		void 使能等号按钮的槽函数(){}
+		void 计算和显示结果的槽函数(){}
+	private:
+		QLineEdit
+		QLabel
+		QPushButton
+	};
+	int main(int argc,char** argv){
+		QApplication app(argc,argv);
+		
+		CalculatorDialog calc;
+		calc.show()
+		
+		return app.exec();
+	}
+	
+练习：显示系统时间，参考time.png
+提示：获取系统时间
+   QTime::currentTime().toString("hh:mm:ss");
+

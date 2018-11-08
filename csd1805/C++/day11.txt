@@ -1,0 +1,107 @@
+今天：
+二十四 异常(Exception)
+1 软件开发中常见错误
+1）语法错误
+2）逻辑错误
+3）功能错误
+4）设计缺陷
+5）需求不符
+6）环境异常
+7）操作不当
+
+2 传统C中的错误处理机制
+1）通过返回值判断错误
+--》优点：函数调用路径中的栈对象可以得到正确的析构函数，不会有内存泄漏风险
+--》缺点：错误处理流程比较麻烦，需要逐层判断，代码臃肿。
+2）通过远程跳转处理错误
+--》优点：不需要逐层返回判断，一步到位的错误处理，代码精炼
+--》缺点：函数调用路径中的栈对象失去被析构的机会，有内存泄漏的风险
+
+3 C++异常机制
+  结合两种传统错误处理的优点，同时避免它们的缺点，在形式上实现一步到位的错误处理，同时保证栈对象得到正确的析构。
+  
+4 异常的语法
+1）异常抛出
+   throw 异常对象;
+   注：异常对象可以基本类型的数据，也可以类类型的对象。
+  
+2）异常的检测和捕获
+	try{
+		可能发生异常的语句;
+	}
+	catch(异常类型1){
+		针对异常类型1的处理..
+	}
+	catch(异常类型2){
+		针对异常类型2的处理..
+	}
+	...
+	catch(...){
+		针对其它异常的处理..
+	}
+	注：catch子句根据throw所抛出的异常对象类型，自上而下顺序匹配，而不是最优匹配；因此对子类类型的异常捕获要写在前面，否则它会被基类类型的异常捕获语句提前截获。
+
+5 函数的异常说明
+1）定义：说明该函数可能抛出的异常类型
+返回类型 函数名(形参表)throw(异常类型表){...}
+2）函数的异常说明是一种承诺，表示该函数所抛出的异常不会超出说明的范围。如果抛出了异常说明以外的类型，该异常无法被正常捕获，而会被系统捕获到，导致进程终止.
+3）两种极端形式
+--》不写异常说明:表示可以抛出任何异常
+--》空异常说明:throw(),表示不会抛出任何异常
+4）如果函数的声明和定义分开书写，要保证异常说明的类型一致，但是顺序无所谓.
+//补充函数重写要求
+5）如果基类中的虚函数带有异常说明，那么该函数在子类中覆盖版本不能说明比基类抛出更多的异常，否则将会因为“放松throw限定”而导致编译失败.
+
+6 标准异常类：exception
+  class exception{
+  public:
+    exception() throw(); 
+    virtual ~exception() throw();
+    /* Returns a C-style character string 	
+     * describing the general cause
+     * of the current error.  */
+     virtual const char* what() const throw();
+  };
+7 构造和析构函数中的异常
+1）构造函数可以抛出异常，但对象会被不完整构造，这样的对象的析构函数不会被正常执行；因此在构造函数抛出异常之前，需要手动的销毁在异常产生之前所分配的动态资源.
+2）析构函数不要抛出异常p
+
+二十五 I/O流//了解
+1 主要I/O流类
+  							ios
+  				/						\
+  			istream				 ostream
+  		/		|		  \     /	 |		 \		
+istrstream ifstream iostream ofstream ostrstream
+ 
+2 格式化I/O
+1）格式化函数(成员函数)
+   cout << 100/3.0 << endl;//33.3333
+   cout.presicion(8);
+   cout << 100/3.0 << endl;//33.333333
+2）流控制符(全局函数)
+   cout << 100/3.0 << endl;//33.3333
+   cout << setprecision(8) << 100/3.0 
+   	<< endl;//33.333333 		
+  
+3 字符串流
+#include <strstream> //过时
+istrstream 
+ostrstream
+------------------------
+#include <sstream> //推荐
+istringstream //类似sscanf
+ostringstream //类似sprintf
+
+4 文件流
+#include <fstream>
+ifstream //类似fscanf
+ofstream //类似fprintf
+
+5 二进制I/O
+ //fwrite
+ ostream& ostream::write(
+ 		const char* buf,size_t num);
+ //fread
+ istream& istream::read(
+ 		char* buf,streamsize num);

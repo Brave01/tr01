@@ -1,0 +1,100 @@
+回顾：
+1 QT多线程(QThread)
+1）QObject::moveToThread(QThread)
+2）继承QThread，重写run//推荐
+	class myClass:public QThread{
+		virtual void run(){
+			//在独立线程中被执行的代码
+		}
+	};
+	myClass m;
+	m.start();
+
+2 线程同步
+1）互斥锁(量) QMutex
+2）读写锁 QReadWriteLock
+3）信号量 QSemaphore
+4）条件变量 QWaitCondition
+
+=====================================
+今天：
+一 QT网络编程
+1 IP地址：QHostAddress
+  QHostAddress(const QString& ip);
+  eg:QHostAddress ip("192.168.1.1");
+  专用IP地址：
+  //127.0.0.1,本地环回地址,主要用于测试
+  QHostAddress::LocalHost
+  //255.255.255.255,局域网广播地址
+  QHostAddress::Broadcast
+  //0.0.0.0,任何网卡的ip地址,主要用于服务器
+  QHostAddress::Any
+
+2 套接字基类：QAbstractSocket
+1）绑定:bind(IP,PORT)
+2）连接服务器：connectToHost(IP,PORT)
+3）断开连接：disconnectFromHost()
+4）获取套接字状态：state()
+5）获取套接字等待读取消息的字节数：
+	bytesAvailable()
+
+6）信号函数
+	//连接服务器成功时发送
+	connected()[signal]
+	//断开连接时发送的信号
+	disconnect()[signal]
+	//网络异常时发送的信号
+	error(SockError)[signal]
+	//套接字有新数据到来时发送的信号
+	readyRead()[signal]
+
+7)读写操作
+	read()/readAll()
+	write()
+
+3 UDP套接字：QUdpSocket
+1）判断是否有等待读取的数据包
+   hasPendingDatagrams()
+2）获取等待读取的数据包大小
+	pendingDatagramSize()
+3）读写操作专用函数
+	readDatagram();
+	writeDatagram();
+
+案例：UDP网络广播
+1）发送端
+	--》广播地址：255.255.255.255
+	--》指定广播端口：8888
+	--》使用定时器，每隔1秒发送一次广播消息
+2）接收端
+	--》绑定接收消息端口
+	--》接收消息并显示
+	
+	mkdir broadcast
+	发送端：sender
+	接收端：receiver
+
+4 TCP套接字：QTcpSocket/QTcpServer
+  //设置监听IP和端口
+  QTcpServer::listen(IP,PORT)
+  //有新的客户端和服务器连接时发送信号
+  QTcpServer::newConnection()[signal]
+  //获取和客户端通信的套接字
+  QTcpServer::nextPendingConnection()
+  
+  案例：网络聊天室
+  1）服务器(server)
+     -->使用QTcpServer创建tcp服务器
+  	  -->接收客户端的连接请求并保存通信的套接字	  -->接收客户端发来的消息
+  	  -->转发消息给所有在线的客户端	
+  2）客户端(client)
+  	  -->使用QTcpSocket创建和服务器通信的套接字
+  	  -->和服务器建立连接
+  	  -->获取用户输入的聊天消息并发送到服务器
+  	  -->接收服务器转发的消息并显示
+  
+  mkdir NetChat
+  服务器工程：Server
+  客户端工程：Client
+
+

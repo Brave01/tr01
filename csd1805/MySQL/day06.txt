@@ -1,0 +1,9 @@
+练习1：根据输入的学号，删除学生信息
+ ...
+ char stuno[20];
+ ...
+  sprintf(sqlstr,"delete from student where student_no=%s",stuno);
+ ...
+
+练习2：根据输入的班级编号，列出该班级的学生的信息
+ 

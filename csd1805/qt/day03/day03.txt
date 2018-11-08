@@ -1,0 +1,152 @@
+回顾：
+1 父窗口(容器窗口)
+  QWidget
+  QMainWindow
+  QDialog
+
+2 信号和槽
+1）对象之间通信方法
+2）连接
+   QObject::connect(
+   	信号发送对象，SIGNAL(信号函数(参数)),
+   	信号接收对象，SLOT(槽函数(参数)));
+3 面向对象QT编程
+=========================
+今天：
+一 QT设计师的使用
+案例：使用设计师，重构加法计算器
+1 创建工程目录
+  mkdir Calculator2
+2 在工程名目录下，输入"designer"既可以进入设计师界面，选择“Dialog Without Button”
+3 在设计师界面完成ui设计
+1）将要用的图形组件从"widgets box"中找到并拖拽到父窗口上。
+2）设置父窗口和每个组件的属性
+--》父窗口
+   objectname：CalculatorDialog
+   注：将来会根据父窗口的名字生成对应的类名
+   font：点大小(20)
+   windowTitle: “加法计算器”
+--》左操作数
+	objectname: m_editX
+	alignment:水平(AlignRight)
+--》右操作数
+	objectname: m_editY
+	alignment:水平(AlignRight)
+--》显示结果
+   objectname: m_editZ
+	alignment:水平(AlignRight)
+	readOnly：勾选√
+--》“+”
+	objectname:m_label
+	双击可以直接修改文本"+"
+--》"="
+   objectname:m_button
+	双击可以直接修改文本"="
+	enabled:去掉勾选√
+3）调整父窗口和组件的大小、位置
+--》方法1：使用鼠标
+--》方法2：使用键盘 shitf/ctrl/方向键
+--》方法3：设置geometry属性
+--》方法4：使用布局器
+4）窗体--》预览
+5）保存(ctrl+s)
+   指定文件名：CalculatorDialog.ui
+6）关闭设计师，最终在工程目录下得到".ui"文件   
+
+4 转换，将“.ui"转换为C++中的".h"文件
+  uic CalculatorDialog.ui -o
+ 				ui_CalculatorDialog.h
+ ".h"文件内容:
+ class Ui_CalculatorDialog{
+ public:
+ 		图形组件的声明;
+ 		void setupUi(){//界面初始化}
+ };	
+ namespace Ui{
+ 	class CalculatorDialog
+ 		:public Ui_CalculatorDialog{};
+ }
+Ui::CalculatorDialog<=等价=>Ui_CalculatorDialog
+
+5 使用界面类(Ui::CalculatorDialog)代码方法
+1）方法1：继承
+  class myclass:public Ui::CalculatorDialog{
+  		//把界面类中代码继承过来可以使用
+  };
+2）方法：组合
+  class myclass{
+  private:
+  		//通过ui访问界面类中的代码
+  	   Ui::CalculatorDialog* ui;
+  }；
+6 使用继承方式完成代码编写
+7 构建、测试..
+
+------------------------------
+案例：登录对话框
+1）创建工程 Login
+2）进入工程目录使用设计师设计ui(LoginDialog.ui)
+-->父窗口：LoginDialog
+-->用户名：m_editUserName
+-->密码：m_editPassword
+		   echoMode:password
+-->按钮框：m_btnBox
+			layoutDirection:RightToLeft
+
+3）编写代码...
+
+-------------
+二 QT创造器(qtcreator)
+案例：使用qtcreator，再次重构加法计算器
+1 输入“qtcreator”,启动QT创造器(IDE)
+2 在欢迎模式点击“new project”创建工程
+1）选择模板：
+   Application->Qt Widgets Applicaiton
+2）项目位置和介绍
+   指定项目名字:Calculator3
+   指定项目路径:.../qt/day03
+  注：将来会在指定目录下创建工程目录Calcualtor3
+3）开发工具(默认)
+4）类信息
+   选择基类(父窗口)：QDialog
+   指定类名：CalculatorDialog
+  注：将来会根据类名自动生成源文件
+  CalculatorDialog.h
+  CalculatorDialog.cpp
+  CalculatorDialog.ui
+5）项目管理（忽略）
+6）完成，切换到编辑模式
+
+3 双击“.ui”文件，进入设计模式(designer)，完成界面设计：
+注：父窗口对象名字不能改！！！
+1）将要用的图形组件从"widgets box"中找到并拖拽到父窗口上。
+2）设置父窗口和每个组件的属性
+--》父窗口
+   font：点大小(20)
+   windowTitle: “加法计算器”
+--》左操作数
+	objectname: m_editX
+	alignment:水平(AlignRight)
+--》右操作数
+	objectname: m_editY
+	alignment:水平(AlignRight)
+--》显示结果
+   objectname: m_editZ
+	alignment:水平(AlignRight)
+	readOnly：勾选√
+--》“+”
+	objectname:m_label
+	双击可以直接修改文本"+"
+--》"="
+   objectname:m_button
+	双击可以直接修改文本"="
+	enabled:去掉勾选√
+3）调整父窗口和组件的大小、位置
+--》方法1：使用鼠标
+--》方法2：使用键盘 shitf/ctrl/方向键
+--》方法3：设置geometry属性
+--》方法4：使用布局器
+4）运行--》预览
+5）保存(ctrl+s)
+
+练习：使用qtcreator重构登录对话框的案例

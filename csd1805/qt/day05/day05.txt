@@ -1,0 +1,197 @@
+回顾：
+1 绘图事件 paintEvent()/QPainter
+2 定时器事件 timerEvent()
+3 鼠标事件
+  mousePressEvent();
+  mouseReleaseEvent();
+  mouseDoubleClickEvent();
+  mouseMoveEvent();
+4 键盘事件
+  keyPressEvent();
+  keyReleaseEvent();
+===========================
+今天：
+一 数据库(Sqlite)
+1 数据库简介
+1）概念
+  数据库是指以一定方式存储在一起、能为多个共享、具有尽可能小的冗余特性，是与应用彼此独立的数据集合。
+2）数据库相关术语
+DB 	数据库(database)
+DBA 	数据库管理员
+DBMS	数据库管理系统
+RDB	关系型数据库
+3）数据库分类
+层次式数据库
+网络式数据库
+关系式数据库
+
+4）常见的数据库
+商业数据库：
+	--》甲骨文Oracle，市场占有率 50%
+	--》IBM的DB2，市场占有率 20%
+	--》微软SqlServer，市场占有率 15%
+
+非商业数据库：
+	--》Sun公司的MySQL  
+	--》轻量级嵌入式数据Sqlite
+
+5）数据库操作语言SQL
+
+2 Sqlite数据库
+1）安装Sqlite数据库
+在线：sudo apt-get install sqlite3
+离线：
+//32位：sudo dpkg -i 
+				sqlite3_3.7.9-2ubuntu1_i386.deb
+//64位：sudo dpkg -i 
+	sqlite3_3.7.9-2ubuntu1.2_amd64.deb
+2）测试
+	在终端输入"sqlite3"正常可进入数据命令行操作界面，会提示当前数据库的版本号:
+	xxxxxxxxxxxxx
+	xxxxxxxxxxxxx
+	sqlite3> 
+	sqlite3>
+	sqlite3>
+	注：在数据库命令操作界面可以输入两种指令，一种是sqlite自身配置和格式控制相关的指令，它们都是以“.”开头，输入“.help”可以查看这些指令帮助文档;还有一种指令是sql语句，实现对数据的增删改查的相关操作，以";"结束。
+
+3 sqlite自身的常用指令	
+1）".help" 查看帮助文档
+2）".database" 查看数据库的名字
+3）".table" 查看数据表的名字
+4）".schema" 查看数据表创建详细信息
+5）".mode MODE" 设置数据显示方式(MODE)
+6）".exit/.quit" 退出
+注：“ctrl+L”可以清屏
+注：“SELECT * FROM company;”可以查看到company数据中全部数据 
+
+4 在命令行使用SQL语句操作数据库
+1）创建数据表
+语法：
+	CREATE TABLE 表名(
+		列名1 类型1 约束,
+		列名2 类型2 约束,
+		....);
+	类型：INT(整型),TEXT(字符串),REAL(浮点数)
+	约束：PRIMARY KEY(主键约束),NOT NULL(非空)
+eg：
+sqlite> CREATE TABLE boy(
+   ...> id INT PRIMARY KEY,
+   ...> age INT NOT NULL,
+   ...> address TEXT,
+   ...> salary REAL NOT NULL);
+
+2）删除数据表
+  DROP TABLE 表名;
+  注：慎用，数据表一旦删除里面包含的数据也将随之消失。
+eg:
+sqlite> .table
+boy      company
+sqlite> DROP TABLE boy;
+sqlite> .table
+company
+
+3)向数据表插入数据(增)
+语法：
+	INSERT INTO 表名
+		(列名1,列名2,...)
+		VALUES(数值1,数值2,...);
+eg:
+sqlite> INSERT INTO company
+   ...> (id,name,age,address,salary)
+   ...> VALUES(10019,"貂蝉",22,"成都",5000.5);
+sqlite> INSERT INTO company
+   ...> (name,id,age,salary)
+   ...> VALUES("小乔",10018,21,8000);
+sqlite> INSERT INTO company
+   ...> VALUES(10021,"大乔",26,"江西",7500.5);
+   
+   
+   
+4)从数据表删除数据(删)
+语法：
+	DELETE FROM 表名 WHERE 条件;
+eg:
+sqlite> DELETE FROM company
+   ...> WHERE id=10029;
+sqlite> DELETE FROM company
+   ...> WHERE age>20 and age<22;
+
+5)修改数据表的数据(改)
+语法：
+	UPDATE 表名 
+		SET 列名1=新数值,列名2=新数值...
+			WHERE 条件;
+eg:
+sqlite> UPDATE company
+   ...> SET salary=salary+3000
+   ...> WHERE age>28 and age<=35;
+   
+6)从数据表查询数据(查)
+语法：
+	SELECT 列名1,列名2,... FROM 表名
+		WHERE 条件 
+			ORDER BY 列名 排序方式;
+	排序方式:ASC(升序排序) DESC(降序排序)
+eg：
+sqlite> SELECT * FROM company
+   ...> ORDER BY id ASC;
+sqlite> SELECT * FROM company
+   ...> WHERE salary<3000 or salary>7500
+   ...> ORDER BY salary DESC;
+
+练习：创建表示学生成绩的数据表(student),列的名字依次是学号(ID),姓名(Name),成绩(Score)
+1)插入以下数据
+  ID		Name 		Score
+  10001	杨健		85.5
+  10003	李辉		86.5
+  10005	王建立	80.5
+  10002	张继文	59.5
+  10004	jianggl	88.5
+  10006	游成伟	90.5
+  10007	Tom		99.9
+2）删除“Tom”
+3）修改“jianggl”--》“蒋贵良”
+4）查询：升序/降序
+	  
+5 在QT中使用SQLITE数据库
+	QT += sql
+1）QSqlDatabase//建立QT程序和数据库连接
+  //添加数据库驱动
+  QSqlDatabase db = 
+  		QSqlDatabase::addDatabase("QSQLITE");
+  //设置数据库名字，对于SQLITE就是“.db”文件名
+  db.setDatabaseName("testDB.db");
+  //打开数据库
+  bool ok = db.open();
+  
+2）QSqlQuery //执行SQL语句
+	QSqlQuery query;
+	QString str("SQL语句insert/delete/update")
+	query.exec(str);
+
+3）QSqlQueryModel //遍历结果集
+ 	QSqlQueryModel *model = new QSqlQueryModel;
+   //执行select语句并保存结果集到model对象
+   model->setQuery("SELECT语句");
+
+	//显示查询结果
+   QTableView *view = new QTableView;
+   view->setModel(model);
+   view->show();
+   
+   案例:学生成绩管理系统
+   工程名：Sqlite
+   类名：SqliteDialog
+   
+   组合框：valueComBox，condComBox
+   操作按钮：sortButton(排序)
+   			 insertButton(插入)
+   			 deleteButton(删除)
+   			 updateButton(修改)
+   输入组件(LineEdit)：
+   			 idEdit
+   			 nameEdit
+   			 scoreEdit	
+
+
+

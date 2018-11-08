@@ -1,0 +1,150 @@
+回顾：
+1 Qt设计师(designer)
+  xx.ui(xml)--uic-->ui_xx.h(cpp)
+2 Qt创造器(qtcreator)
+====================================
+今天
+一 资源和图像
+1 资源编译器(rcc)
+1)创建资源脚本".qrc(xml)"
+<RCC>
+    <qresource prefix="/">
+        <file>0.jpg</file>
+    </qresource>
+</RCC>
+2)根据资源脚本描述，转换为C++源文件
+ rcc test.qrc -o qrc_test.cpp
+     
+2 绘图事件和"画家"类     
+1)当程序开始运行或者窗口发生改变时将会触发绘图事件，对应事件处理函数paintEvent.
+  virtual void paintEvent(QPaintEvent*);
+
+2)绘图事件处理函数是虚函数，如果希望在自定义窗口会绘制指定的图形，可以重写该虚函数，在其中使用"画家"完成指定的图形绘制。
+  注：也可以使用“update()”或“repaint()”手动触发绘图事件。
+
+3）画家QPainter
+  QPainter是Qt中二维图形引擎，可以实现在任何QWidget组件绘制指定的图形.
+ //绘制图片的函数
+ void drawImage(QRect,QImage);
+
+案例：图图秀
+1）创建工程名：ShowPics
+2）指定类名：ShowPicsDialog
+3）设计ui界面
+   frame：
+   	sizePolicy(垂直策略“Expanding”)
+   	frameShape:Box
+   	frameShadow:Raised
+   上一张：m_btnPrev
+   下一张：m_btnNext
+4）添加图片资源
+--》拷贝“images”目录到工程目录下 
+--》添加新文件：Qt->Qt Resource File 
+--》指定名字：showpics
+--》完成，默认切换到资源编辑界面
+--》点击"添加"-》“添加前缀”
+--》修改前缀“/new/prefix1”->"/"
+--》点击"添加"-》“添加文件”
+--》选择images目录下10个图片
+--》保存
+
+
+--------------------------------
+问题：启动qtcreator卡死不动
+解决：rm -r ~/.config/QtProject 
+--------------------------------
+二 目录和定时器
+1 目录操作 QDir
+QDir(const QString& path)
+path：表示路径信息
+   绝对路径：
+   	QDir("/home/user/Documents")
+		QDir("C:/Documents and Settings")
+	相对路径：
+		QDir("images/landscape.png")
+		QDir("./photos")
+
+//遍历目录内容(文件名)		
+QStringList	entryList(Filters filters)
+filters:过滤器，指定要访问内容
+	QDir::Dirs//访问子目录
+	QDir::NoDotAndDotDot//不访问"."和".."
+	QDir::Files//访问普通的文件
+
+   eg:遍历当前"./photos"目录的普通文件
+   QDir dir("./photos");
+   QStringList list = 
+   		dir.entryList(QDir::Files);
+	/*for(int i=0;i<list.size();i++){
+		qDebug() << list.at(i);
+	}*/
+	foreach(QString file,list){
+		qDebug() << file;
+	}
+2 定时器
+1）开启定时器
+	//每隔interval毫秒触发一次定时器事件
+	//返回表示当前定时器的ID
+   int startTimer(int interval);
+	//定时器事件处理函数
+   virtual void timerEvent(QTimerEvent*)
+2）关闭定时器
+   void killTimer(int id);
+
+案例：摇奖机
+工程名：Ernie
+类名：ErnieDialog
+
+-----------------------------
+三 鼠标和键盘
+1 鼠标事件处理
+#include <QMouseEvent>
+//鼠标按下
+void mousePressEvent(QMouseEvent*);
+//鼠标抬起
+void mouseReleaseEvent(QMouseEvent*);
+//鼠标双击
+void mouseDoubleClickEvent(QMouseEvent*);
+//鼠标移动
+void mouseMoveEvent(QMouseEvent*);
+
+//获取引发当前事件鼠标按键
+QMouseEvent::button();
+
+//获取鼠标事件位置(QPoint)
+QMouseEvent::pos()
+
+案例：鼠标测试，实现鼠标拖拽“label”移动
+工程名：Mouse
+类名：MouseDialog
+界面：
+	frameshape:Box
+	frameshadow:Raised
+	autoFillbackground：勾选√
+	palette:点击"继承"--》"改变调色板"
+			  点击“改变调色板”-》“快速”选择颜色
+
+2 按键事件处理
+#include <QKeyEvent>
+//按键按下
+void keyPressEvent(QKeyEvent*)	
+//按键抬起
+void keyReleaseEvent(QKeyEvent*)
+
+int key(void);//获取按键代码，可以判断是哪个按键
+
+练习：测试按键事件，使用按键控制label移动
+提示：可以用方向键“上下左右”控制label移动
+  class xx:public QDialog{
+  		...
+  private:
+  		void keyPressEvent(QKeyEvent* event){
+  			if(event->key()==Qt::Key_Left){
+  				ui->label.move(x-10,y)
+  			}
+  		}
+  };
+  Qt::Key_Left //←
+  Qt::Key_Up //↑
+  Qt::Key_Right //→
+  Qt::Key_Down //↓

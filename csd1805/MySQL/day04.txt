@@ -1,0 +1,338 @@
+回顾:
+1.select avg(score)
+    from choose ch,student s
+      where s.student_no = ch.student_no
+        and s.student_name='张三';
+2.select student_no,avg(score) avgscore
+    from choose
+      group by student_no;
+
+3.select student_no,avg(score) avgscore
+    from choose
+      group by student_no
+       order by avgscore desc,student_no;
+4.select student_no,avg(score) avgscore
+    from choose
+      group by student_no
+        having avgscore>=60
+          order by avgscore desc;
+
+5.delete from choose1 where score>
+  (select avg(score)
+    from choose ch,student s
+      where s.student_no = ch.student_no
+        and s.student_name='张三');
+6. select student_no,course_no,score
+     from choose where score>(
+     select avg(score) from choose
+   );
+
+   select ch.student_no,course_no,score,avgscore
+     from choose ch,
+    (select student_no,avg(score) avgscore from choose
+    group by student_no) a
+      where ch.student_no=a.student_no 
+        and ch.score>a.avgscore;
+-----------------------------------------------------------
+1.索引  index
+ 1.1 作用
+  提高查询的效率
+
+  索引需要大量的时间和空间
+
+ 1.2 创建索引
+  1) create table test_index(
+        id int auto_increment primary key,
+        userid int,
+        name char(10),
+        unique index ix_test_uid (userid)
+     );
+  2) create index ix_test_name on test_index(name);
+ 1.3 查看索引
+  show index from 表名\G
+ 1.4 删除索引
+  drop index 索引名 on 表名;
+
+2.视图 view
+ 2.1 作用
+  1) 简化复杂查询
+  2) 数据安全
+ 2.2 创建视图
+  create view vw_choose
+  as
+    select * from choose1;
+
+  select * from vw_choose;
+  insert into vw_choose values(...);
+  delete from vw_choose where ...;
+
+ 2.3 with check option 选项
+  create view vw_choose
+  as
+    select * from choose where score<80
+    with check option;
+  update vw_choose set score=90 where choose_no=2;# 失败
+-----------------------------------------------------------
+3.变量
+ 3.1 用户会话变量
+ 3.1.1定义
+  set @变量名 = 值;
+    set @user_name='张三'
+  select @变量名 := 值;
+    select @user_name:=100,@age=:=18;
+  select 值 into @变量名;
+    select '李四' into @user_name;
+ 3.2  局部变量
+  declare  变量名 数据类型;
+4.begin...end 块
+5.函数
+ 5.1 无参的函数
+  # 创建函数,实现为查询结果集添加行号
+  delimiter $$   # 重置命令结束标识
+  create function row_no_fn() returns int
+  begin
+    set @r_no = @r_no + 1;
+    return @r_no;
+  end;
+  $$
+  delimiter ;
+  # 调用
+  set @r_no = 0;
+  select row_no_fn() 行号,student_no 学号,student_name 姓名
+     from student;
+
+ 5.2 带参数的函数
+  # 创建一个带参数的函数,根据传入的学号,返回学生的姓名.
+  delimiter $$
+  create function get_name_fn(stu_no int) returns char(20)
+  begin
+    declare stu_name char(20);
+    select student_name into stu_name from student
+       where student_no=stu_no;
+    return stu_name;
+  end;
+  $$
+  delimiter ;
+  # 调用
+  select get_name_fn(2017001);
+ 5.3 查看函数
+  select name from mysql.proc where db='数据库名'
+      and type='function';
+  show create function 函数名\G
+ 5.4 删除函数
+  drop function 函数名;
+6.条件控制语句
+ 6.1 if语句
+  # 改写函数 get_name_fn,传入编号和角色类型,根据参数实现查询,返回查询结果.
+  drop function get_name_fn;
+  delimiter $$
+  create function get_name_fn(no char(10),role char(10)) returns char(20)
+  begin
+    declare name char(20);
+    if role='student' then
+      select student_name into name from student
+         where student_no=no;
+    elseif role='teacher' then
+      select teacher_name into name from teacher
+         where teacher_no=no;
+    else
+      set name='输入错误';
+    end if;
+    return name;
+  end;
+ $$
+ delimiter ;
+ # 调用
+  select get_name_fn('2017001','student') s_name,
+         get_name_fn('001','teacher') t_name,
+         get_name_fn('001','student') s_name1;
+ 6.2 case 语句
+  # 创建一个函数,根据提供的参数打印是星期几
+  delimiter $$
+  create function get_week_fn(no int) returns char(10)
+  begin
+   declare week char(10);
+   case no
+    when 0 then set week='星期一';
+    when 1 then set week='星期二';
+    when 2 then set week='星期三';
+    when 3 then set week='星期四';
+    when 4 then set week='星期五';
+    else set week='休息';
+   end case;
+   return week;
+  end;
+  $$
+  delimiter ;
+  #调用
+   select get_week(weekday(now())),get_week_fn(4);
+
+7 循环语句
+ 7.1  while循环
+  # 使用while实现数字的累加
+  delimiter $$
+  create function get_sum_fn(n int) returns int
+  begin
+   declare sum int default 0;
+   declare i int default 0;
+   while i<n do
+     set i = i + 1;
+     set sum = sum + i;
+   end while;
+   return sum;
+  end;
+  $$
+  delimiter ;
+ 7.2 leave 语句   # 相当于c语言中的 break
+  delimiter $$
+  create function get_sum2_fn(n int) returns int
+  begin
+   declare sum int default 0;
+   declare i int default 0;
+   add_num:while 1=1 do
+     set i = i + 1;
+     set sum = sum + i;
+     if i=n then
+       leave add_num;
+     end if;
+   end while add_num;
+   return sum;
+  end;
+  $$
+  delimiter ;
+ 7.3 repeat循环
+  delimiter $$
+  create function get_sum3_fn(n int) returns int
+  begin
+   declare sum int default 0;
+   declare i int default 0;
+   repeat
+     set i = i + 1;
+     set sum = sum + i;
+     until i=n
+   end repeat;
+   return sum;
+  end;
+  $$
+  delimiter ;
+ 7.4 loop循环
+  # 使用loop循环 实现1..n的累加
+　　delimiter $$
+  create function get_sum4_fn(n int) returns int
+  begin
+    declare sum int default 0;
+    declare i int default 0;
+    add_num:loop
+      set i=i+1;
+      set sum=sum+i;
+      if i=n then
+        leave add_num;
+      end if;
+    end loop;
+    return sum;
+  end;
+  $$
+  delimiter ;
+ 7.5 iterate语句　　　＃　相当于 c语言中的continue语句
+  delimiter $$
+  create function get_sum5_fn(n int) returns int
+  begin
+   declare sum int default 0;
+   declare i int default 0;
+   add_num:while i<n do
+     set i = i + 1;
+       if i%2!=0 then
+         iterate add_num;
+       end if;
+     set sum = sum + i;
+   end while;
+   return sum;
+  end;
+  $$
+  delimiter ;
+　　
+8. 系统函数
+ 8.1 数字函数
+  select round(2.56),round(2.56,1),round(256.46,-2);
+  select truncate(2.56,1),truncate(256.46,-2);
+  select ceil(2.1),floor(2.9);
+  select rand();
+ 8.2 字符串函数
+  select ltrim('   Hello   ') lt,rtrim('   Hello   ') rt,
+         trim('  Hello   ') t;
+  select trim(leading 'ab' from 'ababa Helloaaa') t1,
+         trim(trailing 'ab' from 'ababaHelloaabab') t2,
+         trim(both 'ab' from 'ababaHelloaabab') t3;
+  select left('Hello World!',3),
+         right('Hello World!',3),
+         substring('Hello World!',7,3);
+ 8.3 日期和时间函数
+ 8.4 类型转换函数
+   convert(1,char(10))
+   cast(1 as char(10))
+ 8.5 条件控制函数
+   # if()函数
+   set @score=55;
+   select if(@score>=60,'及格','不及格') res;
+
+   select student_no,course_no,score,
+    if(score>=60,'及格','不及格') res from choose;
+   #ifnull()函数
+   select student_no,course_no,score,
+     ifnull(score,0) res from student;
+9.触发器
+ 9.1 创建触发器实现检查约束:课程表course中的up_limit的值只能在
+  (60,150,230)之间取值
+  delimiter $$
+  create trigger course_insert_before_tri 
+   before insert on course for each row
+  begin
+   if(new.up_limit=60 or new.up_limit=150 or new.up_limit=230) then
+     set new.up_limit=new.up_limit;
+   else
+     insert into table123456 values(1);
+   end if;
+  end;
+  $$
+  delimiter ;
+  # 向课程表中插入测试数据
+  insert into course 
+     values(null,'HTML',100,'暂无',default,'004');
+
+
+
+  old    new:
+  insert             new
+  update     old     new
+  delete     old
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
