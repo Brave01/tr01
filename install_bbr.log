@@ -1,0 +1,53 @@
+获取http://www.elrepo.org/elrepo-release-7.0-3.el7.elrepo.noarch.rpm
+准备中...                          ########################################
+正在升级/安装...
+elrepo-release-7.0-3.el7.elrepo       ########################################
+已加载插件：fastestmirror
+Loading mirror speeds from cached hostfile
+ * base: ftp.iij.ad.jp
+ * elrepo: ftp.yz.yamagata-u.ac.jp
+ * elrepo-kernel: ftp.yz.yamagata-u.ac.jp
+ * epel: ftp.iij.ad.jp
+ * extras: ftp.iij.ad.jp
+ * updates: ftp.iij.ad.jp
+正在解决依赖关系
+--> 正在检查事务
+---> 软件包 kernel-ml.x86_64.0.4.18.11-1.el7.elrepo 将被 安装
+---> 软件包 kernel-ml-devel.x86_64.0.4.18.11-1.el7.elrepo 将被 安装
+--> 解决依赖关系完成
+
+依赖关系解决
+
+================================================================================
+ Package            架构      版本                       源                大小
+================================================================================
+正在安装:
+ kernel-ml          x86_64    4.18.11-1.el7.elrepo       elrepo-kernel     45 M
+ kernel-ml-devel    x86_64    4.18.11-1.el7.elrepo       elrepo-kernel     12 M
+
+事务概要
+================================================================================
+安装  2 软件包
+
+总下载量：57 M
+安装大小：248 M
+Downloading packages:
+--------------------------------------------------------------------------------
+总计                                               3.4 MB/s |  57 MB  00:16     
+Running transaction check
+Running transaction test
+Transaction test succeeded
+Running transaction
+  正在安装    : kernel-ml-4.18.11-1.el7.elrepo.x86_64                       1/2 
+  正在安装    : kernel-ml-devel-4.18.11-1.el7.elrepo.x86_64                 2/2 
+  验证中      : kernel-ml-devel-4.18.11-1.el7.elrepo.x86_64                 1/2 
+  验证中      : kernel-ml-4.18.11-1.el7.elrepo.x86_64                       2/2 
+
+已安装:
+  kernel-ml.x86_64 0:4.18.11-1.el7.elrepo                                       
+  kernel-ml-devel.x86_64 0:4.18.11-1.el7.elrepo                                 
+
+完毕！
+
+[0;32mInfo:[0m The system needs to reboot.
+Do you want to restart system? [y/n]
